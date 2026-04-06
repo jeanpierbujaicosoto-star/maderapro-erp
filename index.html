@@ -1022,7 +1022,13 @@ async function loadInventario() {
   document.getElementById('tabla-inv').innerHTML=prods.length?prods.map(p=>`<tr><td>${p.codigo}</td><td><b>${p.nombre}</b></td><td>${p.unidad}</td><td>${fmt(p.precio_compra)}</td><td>${fmt(p.precio_venta)}</td><td style="color:${p.stock<=p.stock_minimo?'var(--red)':'var(--green)'};">${p.stock}</td><td>${p.stock_minimo}</td><td><span class="badge ${p.stock<=p.stock_minimo?'br':'bg'}">${p.stock<=p.stock_minimo?'bajo':'ok'}</span></td><td><button class="btn btn-sm btn-danger" onclick="eliminarProducto('${p.id}')">Eliminar</button></td></tr>`).join(''):`<tr><td colspan="9"><div class="empty">Sin productos</div></td></tr>`;
 }
 
-async function guardarProducto() {
+async function guardarProducto(
+   if (error) {
+  alert(error.message);
+} else {
+  alert("Producto guardado");
+  loadInventario();
+}) {
   const nombre=document.getElementById('np-nombre').value; if(!nombre){alert('Ingresa el nombre');return;}
   const { error }=await sb.from('productos').insert([{
     codigo:document.getElementById('np-codigo').value||'MAD-'+Date.now(),
