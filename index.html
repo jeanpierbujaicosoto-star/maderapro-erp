@@ -920,10 +920,16 @@ async function cobrarPOS() {
   const serie   = tipo==='factura' ? (config.serie_factura||'F001') : (config.serie_boleta||'B001');
   const corr    = config['correlativo_'+tipo]||'1';
   const numero  = `${serie}-${String(parseInt(corr)).padStart(4,'0')}`;
-   await sb.from('configuracion').upsert({
-  clave: 'correlativo_' + tipo,
-  valor: parseInt(corr) + 1
-   },{ onConflict: 'clave' });
+const { error: errorCorr } = await sb
+  .from('configuracion')
+  .upsert({
+    clave: 'correlativo_' + tipo,
+    valor: String(parseInt(corr) + 1)
+  }, { onConflict: 'clave' });
+
+if (errorCorr) {
+  console.error("Error correlativo:", errorCorr);
+}
   const { data, error } = await sb.from('ventas').insert([{
     numero, tipo, serie,
     cliente_nombre: cliente,
@@ -937,7 +943,14 @@ async function cobrarPOS() {
   if (error) { alert('Error al guardar: '+error.message); return; }
   // Guardar items
   const itemsData = posItems.map(i=>({ venta_id:data.id, producto_id:i.id, producto_nombre:i.nombre, cantidad:i.qty, precio_unitario:i.precio, subtotal:i.qty*i.precio }));
-  await sb.from('venta_items').insert(itemsData);
+const { error: errorItems } = await sb
+  .from('venta_items')
+  .insert(itemsData);
+
+if (errorItems) {
+  alert("Error guardando items");
+  return;
+};
   // Actualizar correlativo
   await sb.from('configuracion').upsert({ clave:'correlativo_'+tipo, valor:String(parseInt(corr)+1) }, { onConflict:'clave' });
   await loadConfig();
