@@ -740,7 +740,8 @@ async function iniciarApp() {
   document.getElementById('app').style.display = 'block';
   document.getElementById('sb-user-name').textContent = currentUser.email.split('@')[0];
   document.getElementById('sb-user-email').textContent = currentUser.email;
-  await loadConfig();
+  await loadConfig(document.getElementById("empresa-titulo").innerText =
+  config.razon_social || "MADERERA LA NATURALEZA HECHO EN ARTE & LA SELVA L.F.P SAC";);
   await loadProductosCache();
   renderDashboard();
   initRealtime();
@@ -912,6 +913,10 @@ async function cobrarPOS() {
   const serie   = tipo==='factura' ? (config.serie_factura||'F001') : (config.serie_boleta||'B001');
   const corr    = config['correlativo_'+tipo]||'1';
   const numero  = `${serie}-${String(parseInt(corr)).padStart(4,'0')}`;
+   await sb.from('configuracion').upsert({
+  clave: 'correlativo_' + tipo,
+  valor: parseInt(corr) + 1
+   },{ onConflict: 'clave' });
   const { data, error } = await sb.from('ventas').insert([{
     numero, tipo, serie,
     cliente_nombre: cliente,
