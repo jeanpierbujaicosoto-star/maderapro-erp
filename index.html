@@ -634,7 +634,11 @@ tr:hover td{background:var(--gray-bg);}
             <div class="form-g"><label class="form-l">Serie factura</label><input id="cfg-sf" placeholder="F001"></div>
           </div>
           <div class="form-g"><label class="form-l">IGV (%)</label><input id="cfg-igv" type="number" placeholder="18"></div>
-          <button class="btn btn-primary" onclick="guardarConfigComprobantes()">Guardar series</button>
+          <button class="btn btn-primary" onclick="guardarConfigComprobantes(await sb.from('configuracion').upsert([
+  { clave: 'serie_factura', valor: document.getElementById('cfg-sf').value },
+  { clave: 'correlativo_factura', valor: 1 }
+], { onConflict: 'clave' });
+)">Guardar series</button>
         </div>
         <div class="card">
           <div class="ctitle">Tipos habilitados</div>
