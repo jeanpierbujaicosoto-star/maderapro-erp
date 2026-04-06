@@ -431,7 +431,7 @@ tr:hover td{background:var(--gray-bg);}
       <div class="card" style="padding:0;overflow:hidden;">
         <div class="table-wrap">
           <table><thead><tr><th>Código</th><th>Nombre</th><th>Unidad</th><th>P.Compra</th><th>P.Venta</th><th>Stock</th><th>Mín.</th><th>Estado</th><th>Acciones</th></tr></thead>
-          <tbody id="tabla-inv"><tr><td colspan="9" class="loading">Cargando...</td></tr></tbody></table>
+          <tbody id="tabla-inv"><button onclick="editarProducto('${p.id}')">Editar</button><button onclick="eliminarProducto('${p.id}')">Eliminar</button><tr><td colspan="9" class="loading">Cargando...</td></tr></tbody></table>
         </div>
       </div>
     </div>
