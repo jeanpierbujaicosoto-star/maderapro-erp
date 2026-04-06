@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#BA7517">
+<meta name="description" content="MaderaPro ERP - Sistema de gestión para empresa de madera">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="MaderaPro">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>MaderaPro ERP</title>
+<style>
+/* ============================================================
+   MADERAPRO ERP — Conectado a Supabase
+   Para personalizar: busca "TU_" en este archivo
+   ============================================================ */
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --amber:#BA7517;--amber-bg:#FAEEDA;--amber-light:#FAC775;--amber-dark:#854F0B;
+  --teal:#0F6E56;--teal-bg:#E1F5EE;
+  --blue:#185FA5;--blue-bg:#E6F1FB;
+  --green:#3B6D11;--green-bg:#EAF3DE;
+  --red:#A32D2D;--red-bg:#FCEBEB;
+  --gray:#444441;--gray-bg:#F1EFE8;
+  --purple:#534AB7;--purple-bg:#EEEDFE;
+  --bg:#FAFAF8;--surface:#FFFFFF;--border:rgba(0,0,0,0.1);
+  --text:#1a1a18;--text2:#5F5E5A;--text3:#888780;
+  --radius:10px;--radius-lg:14px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#1a1a17;--surface:#242420;--border:rgba(255,255,255,0.1);
+    --text:#F1EFE8;--text2:#B4B2A9;--text3:#888780;
+    --amber-bg:#412402;--amber:#FAC775;--amber-dark:#FAC775;
+    --teal-bg:#04342C;--teal:#9FE1CB;
+    --blue-bg:#042C53;--blue:#B5D4F4;
+    --green-bg:#173404;--green:#C0DD97;
+    --red-bg:#501313;--red:#F7C1C1;
+    --gray-bg:#2C2C2A;--purple-bg:#26215C;--purple:#AFA9EC;
+  }
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;}
+
+/* ---- LOGIN SCREEN ---- */
+#login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;}
+.login-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:2rem;width:100%;max-width:380px;}
+.login-logo{text-align:center;margin-bottom:1.5rem;}
+.login-logo-icon{width:56px;height:56px;border-radius:14px;background:var(--amber-bg);display:inline-flex;align-items:center;justify-content:center;margin-bottom:10px;}
+.login-logo-icon svg{width:28px;height:28px;color:var(--amber);}
+.login-title{font-size:20px;font-weight:500;color:var(--text);}
+.login-sub{font-size:13px;color:var(--text3);margin-top:2px;}
+.login-error{background:var(--red-bg);color:var(--red);border-radius:var(--radius);padding:10px 12px;font-size:13px;margin-bottom:12px;display:none;}
+.login-error.show{display:block;}
+.form-group{margin-bottom:14px;}
+.form-label{font-size:12px;font-weight:500;color:var(--text2);margin-bottom:5px;display:block;}
+input[type=email],input[type=password],input,select,textarea{
+  width:100%;border:0.5px solid var(--border);border-radius:var(--radius);
+  padding:10px 12px;font-size:14px;color:var(--text);background:var(--surface);
+}
+input:focus,select:focus{outline:none;border-color:var(--amber);}
+.btn-login{width:100%;padding:12px;background:var(--amber);color:#fff;border:none;border-radius:var(--radius);font-size:14px;font-weight:500;cursor:pointer;margin-top:4px;}
+.btn-login:hover{background:var(--amber-dark);}
+.btn-login:disabled{opacity:0.6;cursor:not-allowed;}
+
+/* ---- APP LAYOUT ---- */
+#app{display:none;}
+.layout{display:grid;grid-template-columns:200px 1fr;min-height:100vh;}
+.sidebar{background:var(--surface);border-right:0.5px solid var(--border);position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;}
+.sidebar-logo{padding:16px;border-bottom:0.5px solid var(--border);}
+.logo-name{font-size:15px;font-weight:500;color:var(--amber-dark);}
+.logo-sub{font-size:11px;color:var(--text3);}
+.nav-group{padding:6px 0;}
+.nav-label{font-size:10px;font-weight:500;color:var(--text3);padding:6px 14px 2px;text-transform:uppercase;letter-spacing:0.6px;}
+.nav-item{display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:pointer;color:var(--text2);font-size:13px;border:none;background:none;width:100%;text-align:left;transition:background 0.1s;}
+.nav-item:hover{background:var(--gray-bg);color:var(--text);}
+.nav-item.active{background:var(--amber-bg);color:var(--amber-dark);font-weight:500;}
+.nav-item svg{width:15px;height:15px;flex-shrink:0;}
+.sidebar-user{margin-top:auto;padding:12px 14px;border-top:0.5px solid var(--border);}
+.sidebar-user-name{font-size:12px;font-weight:500;color:var(--text);}
+.sidebar-user-role{font-size:11px;color:var(--text3);}
+.content{background:var(--bg);overflow:hidden;}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:0.5px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:10;}
+.topbar-title{font-size:16px;font-weight:500;}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.sync-badge{font-size:11px;padding:3px 8px;border-radius:20px;background:var(--teal-bg);color:var(--teal);font-weight:500;}
+.sync-badge.offline{background:var(--red-bg);color:var(--red);}
+.page{display:none;padding:16px 20px;}
+.page.active{display:block;}
+
+/* ---- METRICS ---- */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.metric{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:12px;}
+.mlabel{font-size:11px;color:var(--text3);margin-bottom:3px;}
+.mval{font-size:20px;font-weight:500;}
+.mdelta{font-size:11px;margin-top:2px;color:var(--text3);}
+
+/* ---- CARDS ---- */
+.card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:14px;margin-bottom:12px;}
+.ctitle{font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+
+/* ---- BUTTONS ---- */
+.btn{padding:7px 14px;border:0.5px solid var(--border);border-radius:var(--radius);font-size:12px;cursor:pointer;background:transparent;color:var(--text);font-weight:500;transition:background 0.1s;}
+.btn:hover{background:var(--gray-bg);}
+.btn-primary{background:var(--amber-bg);color:var(--amber-dark);border-color:var(--amber-light);}
+.btn-primary:hover{background:var(--amber-light);}
+.btn-success{background:var(--teal-bg);color:var(--teal);border-color:#9FE1CB;}
+.btn-danger{background:var(--red-bg);color:var(--red);border-color:#F7C1C1;}
+.btn-info{background:var(--blue-bg);color:var(--blue);border-color:#B5D4F4;}
+.btn-full{width:100%;padding:11px;margin-bottom:8px;}
+.btn-sm{padding:4px 10px;font-size:11px;}
+.toolbar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center;}
+
+/* ---- TABLE ---- */
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th{text-align:left;font-size:11px;font-weight:500;color:var(--text3);padding:6px 8px;border-bottom:0.5px solid var(--border);text-transform:uppercase;letter-spacing:0.3px;}
+td{padding:9px 8px;border-bottom:0.5px solid var(--border);color:var(--text);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--gray-bg);}
+
+/* ---- BADGES ---- */
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:500;}
+.bg{background:var(--green-bg);color:var(--green);}
+.ba{background:var(--amber-bg);color:var(--amber-dark);}
+.br{background:var(--red-bg);color:var(--red);}
+.bb{background:var(--blue-bg);color:var(--blue);}
+.bp{background:var(--purple-bg);color:var(--purple);}
+.bt{background:var(--teal-bg);color:var(--teal);}
+
+/* ---- FORM ---- */
+.form-g{margin-bottom:12px;}
+.form-l{font-size:11px;color:var(--text2);font-weight:500;margin-bottom:4px;display:block;}
+.form-r{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.divider{border:none;border-top:0.5px solid var(--border);margin:12px 0;}
+
+/* ---- MODAL ---- */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal-box{background:var(--surface);border-radius:var(--radius-lg);padding:1.5rem;width:min(560px,95vw);max-height:90vh;overflow-y:auto;border:0.5px solid var(--border);}
+.modal-title{font-size:16px;font-weight:500;margin-bottom:1rem;}
+
+/* ---- POS ---- */
+.pos-grid{display:grid;grid-template-columns:1fr 320px;gap:12px;}
+.pos-products{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.pos-card{border:0.5px solid var(--border);border-radius:var(--radius);padding:10px;cursor:pointer;text-align:center;background:var(--surface);transition:all 0.15s;}
+.pos-card:hover{background:var(--amber-bg);border-color:var(--amber-light);}
+.pos-name{font-size:12px;font-weight:500;margin-bottom:2px;color:var(--text);}
+.pos-price{font-size:13px;color:var(--amber);font-weight:500;}
+.pos-unit{font-size:10px;color:var(--text3);}
+.receipt{background:var(--gray-bg);border-radius:var(--radius);padding:12px;height:100%;}
+.pay-btn{padding:8px;border:0.5px solid var(--border);border-radius:var(--radius);cursor:pointer;text-align:center;font-size:11px;background:var(--surface);color:var(--text2);transition:all 0.1s;}
+.pay-btn.selected{background:var(--teal-bg);color:var(--teal);border-color:#9FE1CB;font-weight:500;}
+
+/* ---- LOADING ---- */
+.loading{text-align:center;padding:40px;color:var(--text3);font-size:13px;}
+.spinner{width:24px;height:24px;border:2px solid var(--border);border-top-color:var(--amber);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 8px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ---- TOGGLE ---- */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border);}
+.toggle-row:last-child{border-bottom:none;}
+.sw{width:36px;height:20px;border-radius:10px;background:var(--border);cursor:pointer;position:relative;flex-shrink:0;transition:background 0.2s;}
+.sw.on{background:var(--amber);}
+.sw::after{content:'';position:absolute;width:14px;height:14px;border-radius:50%;background:#fff;top:3px;left:3px;transition:left 0.2s;}
+.sw.on::after{left:19px;}
+
+/* ---- PROGRESS ---- */
+.progress-bar{height:6px;border-radius:3px;background:var(--border);overflow:hidden;margin-top:4px;}
+.progress-fill{height:100%;border-radius:3px;}
+
+/* ---- NOTIF ---- */
+.notif{display:flex;align-items:flex-start;gap:8px;padding:10px;border-radius:var(--radius);margin-bottom:8px;}
+.notif-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:3px;}
+
+/* ---- SECTION TABS ---- */
+.stabs{display:flex;gap:6px;margin-bottom:14px;border-bottom:0.5px solid var(--border);padding-bottom:10px;flex-wrap:wrap;}
+.stab{padding:5px 12px;border-radius:var(--radius);font-size:12px;cursor:pointer;border:none;background:transparent;color:var(--text2);}
+.stab.on{background:var(--amber-bg);color:var(--amber-dark);font-weight:500;}
+
+/* ---- EMPTY STATE ---- */
+.empty{text-align:center;padding:40px 20px;color:var(--text3);}
+.empty-icon{font-size:32px;margin-bottom:8px;}
+
+/* ---- OFFLINE BAR ---- */
+#offline-bar{display:none;background:var(--red);color:#fff;text-align:center;font-size:12px;padding:6px;}
+#offline-bar.show{display:block;}
+</style>
+</head>
+<body>
+
+<div id="offline-bar">Sin conexión — trabajando en modo offline</div>
+
+<!-- ===================== LOGIN ===================== -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+      </div>
+      <div class="login-title">MaderaPro ERP</div>
+      <div class="login-sub">Sistema de gestión — Compra y venta de madera</div>
+    </div>
+    <div class="login-error" id="login-error"></div>
+    <div class="form-group">
+      <label class="form-label">Correo electrónico</label>
+      <input type="email" id="login-email" placeholder="admin@tuempresa.com" autocomplete="email">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Contraseña</label>
+      <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn-login" id="btn-login" onclick="doLogin()">Ingresar al sistema</button>
+    <p style="text-align:center;font-size:11px;color:var(--text3);margin-top:16px;">
+      ¿Olvidaste tu contraseña? Contacta al administrador
+    </p>
+  </div>
+</div>
+
+<!-- ===================== APP ===================== -->
+<div id="app">
+<div class="layout">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <!-- TU EMPRESA: cambia el nombre aquí -->
+    <div class="logo-name">MaderaPro ERP</div>
+    <div class="logo-sub" id="sb-empresa">Cargando...</div>
+  </div>
+  <div class="nav-group">
+    <div class="nav-label">Principal</div>
+    <button class="nav-item active" onclick="go('dashboard',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </button>
+    <button class="nav-item" onclick="go('pos',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+      Venta rápida POS
+    </button>
+  </div>
+  <div class="nav-group">
+    <div class="nav-label">Gestión</div>
+    <button class="nav-item" onclick="go('ventas',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+      Ventas
+    </button>
+    <button class="nav-item" onclick="go('inventario',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+      Inventario
+    </button>
+    <button class="nav-item" onclick="go('compras',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
+      Compras
+    </button>
+    <button class="nav-item" onclick="go('clientes',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+      Clientes
+    </button>
+  </div>
+  <div class="nav-group">
+    <div class="nav-label">Finanzas</div>
+    <button class="nav-item" onclick="go('caja',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+      Caja / Finanzas
+    </button>
+    <button class="nav-item" onclick="go('reportes',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Reportes
+    </button>
+  </div>
+  <div class="nav-group">
+    <div class="nav-label">Sistema</div>
+    <button class="nav-item" onclick="go('ajustes',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      Configuración
+    </button>
+  </div>
+  <div class="sidebar-user">
+    <div class="sidebar-user-name" id="sb-user-name">—</div>
+    <div class="sidebar-user-role" id="sb-user-email">—</div>
+    <button class="btn btn-sm" style="margin-top:6px;width:100%;" onclick="doLogout()">Cerrar sesión</button>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+  <div class="topbar">
+    <div class="topbar-title" id="page-title">Dashboard</div>
+    <div class="topbar-right">
+      <span id="sync-badge" class="sync-badge">● En línea</span>
+      <span style="font-size:11px;color:var(--text3);" id="fecha-top"></span>
+    </div>
+  </div>
+
+  <!-- ===== DASHBOARD ===== -->
+  <div class="page active" id="p-dashboard">
+    <div class="metrics">
+      <div class="metric"><div class="mlabel">Ventas del mes</div><div class="mval" id="d-ventas" style="color:var(--teal)">—</div><div class="mdelta" id="d-ventas-n">cargando...</div></div>
+      <div class="metric"><div class="mlabel">Compras del mes</div><div class="mval" id="d-compras" style="color:var(--red)">—</div><div class="mdelta" id="d-compras-n">cargando...</div></div>
+      <div class="metric"><div class="mlabel">Utilidad</div><div class="mval" id="d-utilidad">—</div><div class="mdelta">este mes</div></div>
+      <div class="metric"><div class="mlabel">Productos</div><div class="mval" id="d-prods">—</div><div class="mdelta" id="d-stock-bajo">cargando...</div></div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <div class="ctitle">Últimas ventas</div>
+        <div id="dash-ventas"><div class="loading"><div class="spinner"></div>Cargando...</div></div>
+      </div>
+      <div class="card">
+        <div class="ctitle">Stock crítico</div>
+        <div id="dash-stock"><div class="loading"><div class="spinner"></div>Cargando...</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== POS ===== -->
+  <div class="page" id="p-pos">
+    <div class="pos-grid">
+      <div>
+        <div class="toolbar">
+          <input placeholder="Buscar producto..." id="pos-search" oninput="filterPOS()" style="flex:1;">
+          <select id="pos-cat" onchange="filterPOS()">
+            <option value="">Todas las categorías</option>
+            <option>Maderas</option><option>Tableros</option><option>Accesorios</option>
+          </select>
+        </div>
+        <div class="pos-products" id="pos-products">
+          <div class="loading" style="grid-column:1/-1;"><div class="spinner"></div>Cargando productos...</div>
+        </div>
+      </div>
+      <div>
+        <div class="receipt">
+          <div style="font-size:13px;font-weight:500;margin-bottom:8px;">Comprobante</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">
+            <select id="pos-tipo" onchange="calcPOS()"><option value="boleta">Boleta</option><option value="factura">Factura</option></select>
+            <input id="pos-cliente" placeholder="Cliente (opcional)">
+          </div>
+          <div class="divider"></div>
+          <div id="pos-items" style="min-height:100px;max-height:220px;overflow-y:auto;"></div>
+          <div class="divider"></div>
+          <div style="font-size:12px;color:var(--text3);text-align:right;" id="pos-sub">Subtotal: S/ 0.00</div>
+          <div style="font-size:12px;color:var(--text3);text-align:right;" id="pos-igv">IGV: S/ 0.00</div>
+          <div style="font-size:16px;font-weight:500;text-align:right;margin:4px 0;" id="pos-total">Total: S/ 0.00</div>
+          <div class="divider"></div>
+          <div style="font-size:11px;font-weight:500;color:var(--text2);margin-bottom:6px;">Método de pago</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px;">
+            <button class="pay-btn selected" onclick="selPay(this,'efectivo')">Efectivo</button>
+            <button class="pay-btn" onclick="selPay(this,'yape')">Yape/Plin</button>
+            <button class="pay-btn" onclick="selPay(this,'transferencia')">Transf.</button>
+          </div>
+          <button class="btn btn-primary btn-full" onclick="cobrarPOS()">Cobrar y guardar</button>
+          <button class="btn btn-success btn-full" onclick="imprimirUltimaVenta('A4')">Imprimir A4</button>
+          <button class="btn btn-full" onclick="imprimirUltimaVenta('ticket')">Imprimir Ticket 80mm</button>
+          <button class="btn btn-danger btn-full" onclick="limpiarPOS()">Limpiar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== VENTAS ===== -->
+  <div class="page" id="p-ventas">
+    <div class="stabs">
+      <button class="stab on" onclick="stab(this,'vt-lista')">Comprobantes</button>
+      <button class="stab" onclick="stab(this,'vt-nueva')">Nueva venta</button>
+    </div>
+    <div id="vt-lista">
+      <div class="toolbar">
+        <input placeholder="Buscar cliente o número..." id="v-search" oninput="loadVentas()" style="width:200px;">
+        <select id="v-tipo" onchange="loadVentas()"><option value="">Todos</option><option value="boleta">Boleta</option><option value="factura">Factura</option><option value="cotizacion">Cotización</option></select>
+        <button class="btn btn-primary btn-sm" onclick="stab(document.querySelector('.stab:nth-child(2)'),'vt-nueva')">+ Nueva venta</button>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div class="table-wrap">
+          <table><thead><tr><th>Número</th><th>Tipo</th><th>Cliente</th><th>Fecha</th><th>Total</th><th>Pago</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody id="tabla-ventas"><tr><td colspan="8" class="loading">Cargando...</td></tr></tbody></table>
+        </div>
+      </div>
+    </div>
+    <div id="vt-nueva" style="display:none;">
+      <div class="card">
+        <div class="ctitle">Datos del comprobante</div>
+        <div class="form-r" style="margin-bottom:10px;">
+          <div class="form-g"><label class="form-l">Tipo</label><select id="nv-tipo"><option value="boleta">Boleta de venta</option><option value="factura">Factura electrónica</option><option value="cotizacion">Cotización</option></select></div>
+          <div class="form-g"><label class="form-l">Método de pago</label><select id="nv-pago"><option value="efectivo">Efectivo</option><option value="yape">Yape/Plin</option><option value="transferencia">Transferencia</option></select></div>
+        </div>
+        <div class="form-r">
+          <div class="form-g"><label class="form-l">Cliente</label><input id="nv-cliente" placeholder="Nombre del cliente"></div>
+          <div class="form-g"><label class="form-l">DNI / RUC</label><input id="nv-doc" placeholder="12345678"></div>
+        </div>
+        <div class="form-r">
+          <div class="form-g"><label class="form-l">Dirección</label><input id="nv-dir" placeholder="Opcional"></div>
+          <div class="form-g"><label class="form-l">Teléfono</label><input id="nv-tel" placeholder="Opcional"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ctitle">Productos</div>
+        <div id="nv-items"></div>
+        <button class="btn btn-sm" onclick="addNVItem()" style="margin-bottom:10px;">+ Agregar producto</button>
+        <div class="divider"></div>
+        <div style="text-align:right;">
+          <div style="font-size:12px;color:var(--text3);">Subtotal: <span id="nv-sub">S/ 0.00</span></div>
+          <div style="font-size:12px;color:var(--text3);">IGV (18%): <span id="nv-igv">S/ 0.00</span></div>
+          <div style="font-size:16px;font-weight:500;">Total: <span id="nv-total">S/ 0.00</span></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-primary" onclick="guardarVenta()">Guardar comprobante</button>
+        <button class="btn btn-success" onclick="guardarVenta('print-a4')">Guardar e imprimir A4</button>
+        <button class="btn" onclick="guardarVenta('print-ticket')">Guardar e imprimir ticket</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== INVENTARIO ===== -->
+  <div class="page" id="p-inventario">
+    <div class="stabs">
+      <button class="stab on" onclick="stab(this,'it-lista')">Productos</button>
+      <button class="stab" onclick="stab(this,'it-nuevo')">Nuevo producto</button>
+      <button class="stab" onclick="stab(this,'it-kardex')">Kardex</button>
+    </div>
+    <div id="it-lista">
+      <div class="toolbar">
+        <input placeholder="Buscar producto..." id="inv-search" oninput="loadInventario()" style="width:200px;">
+        <select id="inv-cat" onchange="loadInventario()"><option value="">Todas categorías</option><option>Maderas</option><option>Tableros</option><option>Accesorios</option></select>
+        <button class="btn btn-primary btn-sm" onclick="stab(document.querySelectorAll('.stab')[1],'it-nuevo')">+ Nuevo producto</button>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div class="table-wrap">
+          <table><thead><tr><th>Código</th><th>Nombre</th><th>Unidad</th><th>P.Compra</th><th>P.Venta</th><th>Stock</th><th>Mín.</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody id="tabla-inv"><tr><td colspan="9" class="loading">Cargando...</td></tr></tbody></table>
+        </div>
+      </div>
+    </div>
+    <div id="it-nuevo" style="display:none;">
+      <div class="card">
+        <div class="ctitle">Datos del producto</div>
+        <div class="form-r">
+          <div class="form-g"><label class="form-l">Nombre</label><input id="np-nombre" placeholder="Ej: Tornillo cedro 1&quot;" style="width:100%;"></div>
+          <div class="form-g"><label class="form-l">Código</label><input id="np-codigo" placeholder="MAD-001"></div>
+        </div>
+        <div class="form-r">
+          <div class="form-g"><label class="form-l">Categoría</label><select id="np-cat"><option>Maderas</option><option>Tableros</option><option>Accesorios</option></select></div>
+          <div class="form-g"><label class="form-l">Unidad</label><select id="np-unidad"><option>Pie tablar</option><option>Metro cúbico</option><option>Plancha</option><option>Unidad</option><option>Metro lineal</option><option>Kilogramo</option></select></div>
+        </div>
+        <div class="form-r">
+          <div class="form-g"><label class="form-l">Precio compra (S/)</label><input id="np-pcompra" type="number" step="0.01" placeholder="0.00"></div>
+          <div class="form-g"><label class="form-l">Precio venta (S/)</label><input id="np-pventa" type="number" step="0.01" placeholder="0.00"></div>
+        </div>
+        <div class="form-r">
+          <div class="form-g"><label class="form-l">Stock inicial</label><input id="np-stock" type="number" placeholder="0"></div>
+          <div class="form-g"><label class="form-l">Stock mínimo (alerta)</label><input id="np-stockmin" type="number" placeholder="10"></div>
+        </div>
+        <button class="btn btn-primary" onclick="guardarProducto()">Guardar producto</button>
+      </div>
+    </div>
+    <div id="it-kardex" style="display:none;">
+      <div class="card">
+        <div class="ctitle">Kardex de movimientos</div>
+        <div class="toolbar">
+          <select id="kardex-prod" style="width:240px;"><option value="">Seleccionar producto...</option></select>
+          <button class="btn btn-info btn-sm" onclick="loadKardex()">Ver kardex</button>
+        </div>
+        <div id="kardex-content"><div class="empty"><div class="empty-icon">📋</div>Selecciona un producto</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== COMPRAS ===== -->
+  <div class="page" id="p-compras">
+    <div class="stabs">
+      <button class="stab on" onclick="stab(this,'ct-lista')">Órdenes de compra</button>
+      <button class="stab" onclick="stab(this,'ct-nueva')">Nueva orden</button>
+      <button class="stab" onclick="stab(this,'ct-proveedores')">Proveedores</button>
+    </div>
+    <div id="ct-lista">
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div class="table-wrap">
+          <table><thead><tr><th>Orden</th><th>Proveedor</th><th>Fecha</th><th>Total</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody id="tabla-compras"><tr><td colspan="6" class="loading">Cargando...</td></tr></tbody></table>
+        </div>
+      </div>
+    </div>
+    <div id="ct-nueva" style="display:none;">
+      <div class="card">
+        <div class="ctitle">Nueva orden de compra</div>
+        <div class="form-r">
+          <div class="form-g"><label class="form-l">Proveedor</label><input id="nc-prov" placeholder="Nombre del proveedor" style="width:100%;"></div>
+          <div class="form-g"><label class="form-l">RUC</label><input id="nc-ruc" placeholder="20XXXXXXXXX"></div>
+        </div>
+        <div class="form-g"><label class="form-l">Notas</label><input id="nc-notas" placeholder="Observaciones..." style="width:100%;"></div>
+        <div id="nc-items"></div>
+        <button class="btn btn-sm" onclick="addNCItem()" style="margin-bottom:10px;">+ Agregar producto</button>
+        <div style="text-align:right;font-size:15px;font-weight:500;margin-bottom:10px;">Total: <span id="nc-total">S/ 0.00</span></div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-primary" onclick="guardarCompra()">Guardar orden</button>
+          <button class="btn btn-success" onclick="guardarCompra('print')">Guardar e imprimir</button>
+        </div>
+      </div>
+    </div>
+    <div id="ct-proveedores" style="display:none;">
+      <div class="toolbar"><button class="btn btn-primary btn-sm" onclick="nuevoProveedor()">+ Nuevo proveedor</button></div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div class="table-wrap">
+          <table><thead><tr><th>Proveedor</th><th>RUC</th><th>Contacto</th><th>Teléfono</th><th>Acciones</th></tr></thead>
+          <tbody id="tabla-proveedores"><tr><td colspan="5" class="loading">Cargando...</td></tr></tbody></table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CLIENTES ===== -->
+  <div class="page" id="p-clientes">
+    <div class="toolbar">
+      <input placeholder="Buscar cliente..." id="cli-search" oninput="loadClientes()" style="width:200px;">
+      <button class="btn btn-primary btn-sm" onclick="nuevoCliente()">+ Nuevo cliente</button>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div class="table-wrap">
+        <table><thead><tr><th>Nombre</th><th>DNI/RUC</th><th>Tipo</th><th>Teléfono</th><th>Total comprado</th><th>Acciones</th></tr></thead>
+        <tbody id="tabla-clientes"><tr><td colspan="6" class="loading">Cargando...</td></tr></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CAJA ===== -->
+  <div class="page" id="p-caja">
+    <div class="metrics" style="grid-template-columns:repeat(3,1fr);">
+      <div class="metric"><div class="mlabel">Ingresos hoy</div><div class="mval" id="c-ing" style="color:var(--teal)">—</div></div>
+      <div class="metric"><div class="mlabel">Egresos hoy</div><div class="mval" id="c-egr" style="color:var(--red)">—</div></div>
+      <div class="metric"><div class="mlabel">Saldo del día</div><div class="mval" id="c-sal">—</div></div>
+    </div>
+    <div class="toolbar">
+      <button class="btn btn-success btn-sm" onclick="nuevoMovimiento('ingreso')">+ Ingreso</button>
+      <button class="btn btn-danger btn-sm" onclick="nuevoMovimiento('egreso')">+ Egreso</button>
+    </div>
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div class="table-wrap">
+        <table><thead><tr><th>Hora</th><th>Concepto</th><th>Categoría</th><th>Tipo</th><th>Monto</th></tr></thead>
+        <tbody id="tabla-caja"><tr><td colspan="5" class="loading">Cargando...</td></tr></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== REPORTES ===== -->
+  <div class="page" id="p-reportes">
+    <div class="stabs">
+      <button class="stab on" onclick="stab(this,'rp-ventas')">Ventas</button>
+      <button class="stab" onclick="stab(this,'rp-inventario')">Inventario</button>
+      <button class="stab" onclick="stab(this,'rp-financiero')">Financiero</button>
+    </div>
+    <div id="rp-ventas">
+      <div class="metrics" style="grid-template-columns:repeat(3,1fr);">
+        <div class="metric"><div class="mlabel">Total ventas mes</div><div class="mval" id="r-tv" style="color:var(--teal)">—</div></div>
+        <div class="metric"><div class="mlabel">Número de ventas</div><div class="mval" id="r-nv">—</div></div>
+        <div class="metric"><div class="mlabel">Ticket promedio</div><div class="mval" id="r-prom">—</div></div>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div class="ctitle" style="padding:14px 14px 0;">Ventas del mes</div>
+        <div class="table-wrap">
+          <table><thead><tr><th>Fecha</th><th>Tipo</th><th>Cliente</th><th>Total</th><th>Método pago</th></tr></thead>
+          <tbody id="tabla-rventas"><tr><td colspan="5" class="loading">Cargando...</td></tr></tbody></table>
+        </div>
+      </div>
+    </div>
+    <div id="rp-inventario" style="display:none;">
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div class="ctitle" style="padding:14px 14px 0;">Valorización de inventario</div>
+        <div class="table-wrap">
+          <table><thead><tr><th>Producto</th><th>Stock</th><th>P.Compra</th><th>P.Venta</th><th>Valor stock</th><th>Margen</th></tr></thead>
+          <tbody id="tabla-rinv"><tr><td colspan="6" class="loading">Cargando...</td></tr></tbody></table>
+        </div>
+      </div>
+    </div>
+    <div id="rp-financiero" style="display:none;">
+      <div class="metrics">
+        <div class="metric"><div class="mlabel">Ingresos totales</div><div class="mval" id="rf-ing" style="color:var(--teal)">—</div></div>
+        <div class="metric"><div class="mlabel">Egresos totales</div><div class="mval" id="rf-egr" style="color:var(--red)">—</div></div>
+        <div class="metric"><div class="mlabel">Utilidad</div><div class="mval" id="rf-util">—</div></div>
+        <div class="metric"><div class="mlabel">IGV cobrado</div><div class="mval" id="rf-igv">—</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== AJUSTES ===== -->
+  <div class="page" id="p-ajustes">
+    <div class="stabs">
+      <button class="stab on" onclick="stab(this,'aj-empresa')">Empresa</button>
+      <button class="stab" onclick="stab(this,'aj-comprobantes')">Comprobantes</button>
+      <button class="stab" onclick="stab(this,'aj-sunat')">SUNAT</button>
+    </div>
+    <div id="aj-empresa">
+      <div class="grid2">
+        <div class="card">
+          <div class="ctitle">Datos de la empresa</div>
+          <div class="form-g"><label class="form-l">Razón social</label><input id="cfg-razon" style="width:100%;"></div>
+          <div class="form-r">
+            <div class="form-g"><label class="form-l">RUC</label><input id="cfg-ruc"></div>
+            <div class="form-g"><label class="form-l">Moneda</label><select id="cfg-moneda"><option value="PEN">Soles (S/)</option><option value="USD">Dólares ($)</option></select></div>
+          </div>
+          <div class="form-g"><label class="form-l">Dirección</label><input id="cfg-dir" style="width:100%;"></div>
+          <div class="form-r">
+            <div class="form-g"><label class="form-l">Teléfono</label><input id="cfg-tel"></div>
+            <div class="form-g"><label class="form-l">Email</label><input id="cfg-email"></div>
+          </div>
+          <button class="btn btn-primary" onclick="guardarConfig()" style="margin-top:6px;">Guardar cambios</button>
+        </div>
+        <div class="card">
+          <div class="ctitle">Estado de la conexión</div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13px;">Base de datos Supabase</span><span class="badge" id="db-status">verificando...</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13px;">Sincronización en tiempo real</span><span class="badge bt">activo</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13px;">Autenticación</span><span class="badge bg">ok</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13px;">Modo offline (PWA)</span><span class="badge bt">habilitado</span></div>
+          </div>
+          <div class="divider"></div>
+          <div class="ctitle">Configuración Supabase</div>
+          <div style="font-size:11px;color:var(--text3);background:var(--gray-bg);padding:10px;border-radius:var(--radius);font-family:monospace;word-break:break-all;">
+            URL: <span id="cfg-url-display">—</span><br>
+            Key: <span id="cfg-key-display">—</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="aj-comprobantes" style="display:none;">
+      <div class="grid2">
+        <div class="card">
+          <div class="ctitle">Series activas</div>
+          <div class="form-r">
+            <div class="form-g"><label class="form-l">Serie boleta</label><input id="cfg-sb" placeholder="B001"></div>
+            <div class="form-g"><label class="form-l">Serie factura</label><input id="cfg-sf" placeholder="F001"></div>
+          </div>
+          <div class="form-g"><label class="form-l">IGV (%)</label><input id="cfg-igv" type="number" placeholder="18"></div>
+          <button class="btn btn-primary" onclick="guardarConfigComprobantes()">Guardar series</button>
+        </div>
+        <div class="card">
+          <div class="ctitle">Tipos habilitados</div>
+          <div class="toggle-row"><div><div style="font-size:13px;">Boleta electrónica</div><div style="font-size:11px;color:var(--text3);">Para consumidores finales</div></div><div class="sw on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="toggle-row"><div><div style="font-size:13px;">Factura electrónica</div><div style="font-size:11px;color:var(--text3);">Para empresas con RUC</div></div><div class="sw on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="toggle-row"><div><div style="font-size:13px;">Cotización</div><div style="font-size:11px;color:var(--text3);">No va a SUNAT</div></div><div class="sw on" onclick="this.classList.toggle('on')"></div></div>
+        </div>
+      </div>
+    </div>
+    <div id="aj-sunat" style="display:none;">
+      <div class="card">
+        <div class="ctitle">Integración SUNAT (próximamente)</div>
+        <div style="background:var(--amber-bg);color:var(--amber-dark);border-radius:var(--radius);padding:12px;font-size:13px;margin-bottom:12px;">
+          La integración con SUNAT requiere un PSE (Nubefact, Greenter). Cuando tengas tus credenciales, dile a Claude que te genere el código de integración.
+        </div>
+        <div class="form-g"><label class="form-l">PSE / Proveedor</label><select><option>Nubefact (recomendado)</option><option>Greenter (código abierto)</option><option>SUNAT Facturador</option></select></div>
+        <div class="form-g"><label class="form-l">Token API</label><input placeholder="Ingresa tu token de Nubefact..." style="width:100%;"></div>
+        <button class="btn btn-primary">Conectar (disponible próximamente)</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end content -->
+</div><!-- end layout -->
+</div><!-- end app -->
+
+<!-- MODAL GENÉRICO -->
+<div class="modal-overlay" id="modal">
+  <div class="modal-box" id="modal-content"></div>
+</div>
+
+<!-- SUPABASE SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+<script>
+// ============================================================
+// CONFIGURACIÓN SUPABASE
+// 1. Ve a https://supabase.com → tu proyecto → Settings → API
+// 2. Copia "Project URL" y "anon public key"
+// 3. Pega aquí abajo reemplazando los valores de ejemplo
+// ============================================================
+const SUPABASE_URL = 'TU_URL_AQUI';      // Ej: https://xyzxyz.supabase.co
+const SUPABASE_KEY = 'TU_ANON_KEY_AQUI'; // Empieza con eyJ...
+// ============================================================
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ---- ESTADO GLOBAL ----
+let currentUser = null;
+let productos = [];
+let posItems = [];
+let posPayMethod = 'efectivo';
+let ultimaVentaId = null;
+let config = {};
+
+// ---- UTILIDADES ----
+const fmt = n => 'S/ ' + parseFloat(n||0).toFixed(2);
+const hoy = () => new Date().toISOString().split('T')[0];
+const mesActual = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; };
+
+document.getElementById('fecha-top').textContent = new Date().toLocaleDateString('es-PE',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+
+// ---- OFFLINE ----
+window.addEventListener('online',  () => { document.getElementById('offline-bar').classList.remove('show'); document.getElementById('sync-badge').textContent='● En línea'; document.getElementById('sync-badge').className='sync-badge'; });
+window.addEventListener('offline', () => { document.getElementById('offline-bar').classList.add('show'); document.getElementById('sync-badge').textContent='● Sin conexión'; document.getElementById('sync-badge').className='sync-badge offline'; });
+
+// ============================================================
+// AUTENTICACIÓN
+// ============================================================
+async function doLogin() {
+  const btn = document.getElementById('btn-login');
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-password').value;
+  const err   = document.getElementById('login-error');
+  if (!email || !pass) { showError('Ingresa tu correo y contraseña'); return; }
+  btn.disabled = true; btn.textContent = 'Ingresando...';
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+  if (error) { showError('Correo o contraseña incorrectos'); btn.disabled=false; btn.textContent='Ingresar al sistema'; return; }
+  currentUser = data.user;
+  iniciarApp();
+}
+
+function showError(msg) {
+  const el = document.getElementById('login-error');
+  el.textContent = msg; el.classList.add('show');
+}
+
+async function doLogout() {
+  await sb.auth.signOut();
+  document.getElementById('app').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  currentUser = null;
+}
+
+// ---- VERIFICAR SESIÓN AL CARGAR ----
+async function checkSession() {
+  const { data } = await sb.auth.getSession();
+  if (data.session) { currentUser = data.session.user; iniciarApp(); }
+}
+
+async function iniciarApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('sb-user-name').textContent = currentUser.email.split('@')[0];
+  document.getElementById('sb-user-email').textContent = currentUser.email;
+  await loadConfig();
+  await loadProductosCache();
+  renderDashboard();
+  initRealtime();
+  verificarConexion();
+}
+
+// ---- REALTIME SYNC ----
+function initRealtime() {
+  sb.channel('erp-changes')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'ventas' }, () => {
+      if (document.getElementById('p-dashboard').classList.contains('active')) renderDashboard();
+      if (document.getElementById('p-ventas').classList.contains('active')) loadVentas();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'productos' }, () => {
+      loadProductosCache();
+      if (document.getElementById('p-inventario').classList.contains('active')) loadInventario();
+    })
+    .subscribe();
+}
+
+// ============================================================
+// CONFIGURACIÓN
+// ============================================================
+async function loadConfig() {
+  const { data } = await sb.from('configuracion').select('*');
+  if (!data) return;
+  data.forEach(r => config[r.clave] = r.valor);
+  const rs = config.razon_social || 'Tu empresa';
+  document.getElementById('sb-empresa').textContent = rs;
+  // Mostrar en ajustes
+  ['razon_social','ruc','direccion','telefono'].forEach(k => {
+    const el = document.getElementById('cfg-'+k.split('_')[0]);
+    if (el && config[k]) el.value = config[k];
+  });
+  const cfgEmail = document.getElementById('cfg-email');
+  if (cfgEmail && config.email) cfgEmail.value = config.email;
+  const cfgSB = document.getElementById('cfg-sb'); if(cfgSB) cfgSB.value = config.serie_boleta||'B001';
+  const cfgSF = document.getElementById('cfg-sf'); if(cfgSF) cfgSF.value = config.serie_factura||'F001';
+  const cfgIGV = document.getElementById('cfg-igv'); if(cfgIGV) cfgIGV.value = config.igv||'18';
+  const urlD = document.getElementById('cfg-url-display'); if(urlD) urlD.textContent = SUPABASE_URL;
+  const keyD = document.getElementById('cfg-key-display'); if(keyD) keyD.textContent = SUPABASE_KEY.substring(0,30)+'...';
+}
+
+async function guardarConfig() {
+  const updates = [
+    { clave:'razon_social', valor: document.getElementById('cfg-razon').value },
+    { clave:'ruc',          valor: document.getElementById('cfg-ruc').value },
+    { clave:'direccion',    valor: document.getElementById('cfg-dir').value },
+    { clave:'telefono',     valor: document.getElementById('cfg-tel').value },
+  ];
+  for (const u of updates) {
+    await sb.from('configuracion').upsert({ clave:u.clave, valor:u.valor }, { onConflict:'clave' });
+  }
+  await loadConfig();
+  alert('Configuración guardada ✓');
+}
+
+async function guardarConfigComprobantes() {
+  const updates = [
+    { clave:'serie_boleta',  valor: document.getElementById('cfg-sb').value },
+    { clave:'serie_factura', valor: document.getElementById('cfg-sf').value },
+    { clave:'igv',           valor: document.getElementById('cfg-igv').value },
+  ];
+  for (const u of updates) {
+    await sb.from('configuracion').upsert({ clave:u.clave, valor:u.valor }, { onConflict:'clave' });
+  }
+  await loadConfig();
+  alert('Series guardadas ✓');
+}
+
+async function verificarConexion() {
+  const { error } = await sb.from('configuracion').select('id').limit(1);
+  const el = document.getElementById('db-status');
+  if (el) { el.textContent = error ? 'error' : 'conectado'; el.className = 'badge ' + (error ? 'br' : 'bg'); }
+}
+
+// ============================================================
+// PRODUCTOS (cache local)
+// ============================================================
+async function loadProductosCache() {
+  const { data } = await sb.from('productos').select('*').order('nombre');
+  productos = data || [];
+  renderPOSProducts(productos);
+  // Llenar select kardex
+  const sel = document.getElementById('kardex-prod');
+  if (sel) { sel.innerHTML = '<option value="">Seleccionar producto...</option>' + productos.map(p=>`<option value="${p.id}">${p.nombre}</option>`).join(''); }
+}
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+async function renderDashboard() {
+  const mes = mesActual();
+  // Ventas del mes
+  const { data: vData } = await sb.from('ventas').select('total,tipo').gte('fecha', mes+'-01').neq('tipo','cotizacion');
+  const totalVentas = (vData||[]).reduce((a,v)=>a+parseFloat(v.total),0);
+  document.getElementById('d-ventas').textContent = fmt(totalVentas);
+  document.getElementById('d-ventas-n').textContent = (vData||[]).length + ' comprobantes';
+  // Compras del mes
+  const { data: cData } = await sb.from('compras').select('total').gte('fecha', mes+'-01');
+  const totalCompras = (cData||[]).reduce((a,c)=>a+parseFloat(c.total),0);
+  document.getElementById('d-compras').textContent = fmt(totalCompras);
+  document.getElementById('d-compras-n').textContent = (cData||[]).length + ' órdenes';
+  // Utilidad
+  const util = totalVentas - totalCompras;
+  const du = document.getElementById('d-utilidad');
+  du.textContent = fmt(util); du.style.color = util>=0?'var(--teal)':'var(--red)';
+  // Productos / stock
+  document.getElementById('d-prods').textContent = productos.length;
+  const bajos = productos.filter(p=>p.stock<=p.stock_minimo);
+  document.getElementById('d-stock-bajo').textContent = bajos.length + ' con stock bajo';
+  // Últimas ventas
+  const { data: ultVentas } = await sb.from('ventas').select('*').order('created_at',{ascending:false}).limit(5);
+  const dv = document.getElementById('dash-ventas');
+  dv.innerHTML = (ultVentas||[]).length ? `<table><thead><tr><th>Núm.</th><th>Cliente</th><th>Total</th><th>Estado</th></tr></thead><tbody>${(ultVentas||[]).map(v=>`<tr><td><b>${v.numero}</b></td><td>${v.cliente_nombre||'Sin nombre'}</td><td>${fmt(v.total)}</td><td><span class="badge ${v.estado==='pagado'?'bg':'ba'}">${v.estado}</span></td></tr>`).join('')}</tbody></table>` : '<div class="empty"><div class="empty-icon">🧾</div>Sin ventas aún</div>';
+  // Stock crítico
+  const ds = document.getElementById('dash-stock');
+  ds.innerHTML = bajos.length ? bajos.map(p=>`<div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;font-size:12px;"><span>${p.nombre}</span><span style="color:${p.stock<=p.stock_minimo*0.5?'var(--red)':'var(--amber)'};font-weight:500;">${p.stock}/${p.stock_minimo}</span></div><div class="progress-bar"><div class="progress-fill" style="width:${Math.min(100,p.stock/p.stock_minimo*100)}%;background:${p.stock<=p.stock_minimo*0.5?'var(--red)':'var(--amber)'};"></div></div></div>`).join('') : '<div class="empty"><div class="empty-icon">✅</div>Todo el stock está bien</div>';
+}
+
+// ============================================================
+// POS
+// ============================================================
+function renderPOSProducts(prods) {
+  const el = document.getElementById('pos-products');
+  if (!el) return;
+  el.innerHTML = prods.map(p=>`<div class="pos-card" onclick="addPOS('${p.id}','${p.nombre.replace(/'/g,"\\'")}',${p.precio_venta},'${p.unidad}')"><div class="pos-name">${p.nombre}</div><div class="pos-price">${fmt(p.precio_venta)}</div><div class="pos-unit">${p.unidad}</div></div>`).join('');
+}
+
+function filterPOS() {
+  const q = document.getElementById('pos-search')?.value.toLowerCase()||'';
+  const cat = document.getElementById('pos-cat')?.value||'';
+  renderPOSProducts(productos.filter(p=>(!q||p.nombre.toLowerCase().includes(q))&&(!cat||p.categoria===cat)));
+}
+
+function addPOS(id, nombre, precio, unidad) {
+  const ex = posItems.find(i=>i.id===id);
+  if (ex) ex.qty++;
+  else posItems.push({id,nombre,precio:parseFloat(precio),unidad,qty:1});
+  renderPOSItems();
+}
+
+function renderPOSItems() {
+  const el = document.getElementById('pos-items');
+  if (!posItems.length) { el.innerHTML='<div style="text-align:center;color:var(--text3);padding:20px;font-size:12px;">Selecciona productos del catálogo</div>'; calcPOS(); return; }
+  el.innerHTML = posItems.map((it,i)=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:0.5px solid var(--border);gap:6px;"><div style="flex:1;"><div style="font-size:12px;font-weight:500;">${it.nombre}</div><div style="font-size:10px;color:var(--text3);">${it.unidad} × ${fmt(it.precio)}</div></div><div style="display:flex;align-items:center;gap:4px;"><button style="width:22px;height:22px;border:0.5px solid var(--border);border-radius:4px;cursor:pointer;background:var(--surface);" onclick="chgQty(${i},-1)">-</button><span style="min-width:20px;text-align:center;font-size:13px;font-weight:500;">${it.qty}</span><button style="width:22px;height:22px;border:0.5px solid var(--border);border-radius:4px;cursor:pointer;background:var(--surface);" onclick="chgQty(${i},1)">+</button><span style="font-size:12px;font-weight:500;min-width:56px;text-align:right;">${fmt(it.qty*it.precio)}</span></div></div>`).join('');
+  calcPOS();
+}
+
+function chgQty(i, d) { posItems[i].qty += d; if(posItems[i].qty<=0) posItems.splice(i,1); renderPOSItems(); }
+function limpiarPOS() { posItems=[]; renderPOSItems(); }
+function selPay(btn, m) { posPayMethod=m; document.querySelectorAll('.pay-btn').forEach(b=>b.classList.remove('selected')); btn.classList.add('selected'); }
+
+function calcPOS() {
+  const sub = posItems.reduce((a,i)=>a+i.qty*i.precio,0);
+  const tipo = document.getElementById('pos-tipo')?.value||'boleta';
+  const igv  = tipo==='factura' ? sub*18/118 : 0;
+  document.getElementById('pos-sub').textContent   = 'Subtotal: '+fmt(sub-(tipo==='factura'?igv:0));
+  document.getElementById('pos-igv').textContent   = 'IGV (18%): '+fmt(igv);
+  document.getElementById('pos-total').textContent = 'Total: '+fmt(sub);
+}
+
+async function cobrarPOS() {
+  if (!posItems.length) { alert('Agrega productos'); return; }
+  const tipo    = document.getElementById('pos-tipo').value;
+  const cliente = document.getElementById('pos-cliente').value || 'Cliente general';
+  const sub = posItems.reduce((a,i)=>a+i.qty*i.precio,0);
+  const igv = tipo==='factura' ? sub*18/118 : 0;
+  const serie   = tipo==='factura' ? (config.serie_factura||'F001') : (config.serie_boleta||'B001');
+  const corr    = config['correlativo_'+tipo]||'1';
+  const numero  = `${serie}-${String(parseInt(corr)).padStart(4,'0')}`;
+  const { data, error } = await sb.from('ventas').insert([{
+    numero, tipo, serie,
+    cliente_nombre: cliente,
+    fecha: hoy(),
+    subtotal: parseFloat((sub-(tipo==='factura'?igv:0)).toFixed(2)),
+    igv: parseFloat(igv.toFixed(2)),
+    total: parseFloat(sub.toFixed(2)),
+    metodo_pago: posPayMethod,
+    estado: 'pagado'
+  }]).select().single();
+  if (error) { alert('Error al guardar: '+error.message); return; }
+  // Guardar items
+  const itemsData = posItems.map(i=>({ venta_id:data.id, producto_id:i.id, producto_nombre:i.nombre, cantidad:i.qty, precio_unitario:i.precio, subtotal:i.qty*i.precio }));
+  await sb.from('venta_items').insert(itemsData);
+  // Actualizar correlativo
+  await sb.from('configuracion').upsert({ clave:'correlativo_'+tipo, valor:String(parseInt(corr)+1) }, { onConflict:'clave' });
+  await loadConfig();
+  ultimaVentaId = data.id;
+  alert(`${tipo.charAt(0).toUpperCase()+tipo.slice(1)} ${numero} guardada ✓`);
+  limpiarPOS();
+}
+
+async function imprimirUltimaVenta(formato) {
+  if (!ultimaVentaId) { alert('Primero realiza una venta'); return; }
+  const { data } = await sb.from('ventas').select('*, venta_items(*)').eq('id', ultimaVentaId).single();
+  if (data) printVenta(data, formato);
+}
+
+// ============================================================
+// VENTAS
+// ============================================================
+async function loadVentas() {
+  const search = document.getElementById('v-search')?.value.toLowerCase()||'';
+  const tipo   = document.getElementById('v-tipo')?.value||'';
+  let q = sb.from('ventas').select('*').order('created_at',{ascending:false}).limit(100);
+  if (tipo) q = q.eq('tipo',tipo);
+  const { data } = await q;
+  const ventas = (data||[]).filter(v=>!search||(v.cliente_nombre||'').toLowerCase().includes(search)||(v.numero||'').toLowerCase().includes(search));
+  document.getElementById('tabla-ventas').innerHTML = ventas.length ?
+    ventas.map(v=>`<tr><td><b>${v.numero}</b></td><td><span class="badge ${v.tipo==='factura'?'bb':v.tipo==='cotizacion'?'ba':'bg'}">${v.tipo}</span></td><td>${v.cliente_nombre||'—'}</td><td>${v.fecha}</td><td>${fmt(v.total)}</td><td>${v.metodo_pago||'—'}</td><td><span class="badge ${v.estado==='pagado'?'bg':'ba'}">${v.estado}</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-sm btn-success" onclick="printVentaById('${v.id}','A4')">A4</button><button class="btn btn-sm" onclick="printVentaById('${v.id}','ticket')">Ticket</button></div></td></tr>`).join('') :
+    `<tr><td colspan="8"><div class="empty">Sin resultados</div></td></tr>`;
+}
+
+// Nueva venta manual
+function addNVItem() {
+  const id='nvi'+Date.now();
+  const opts = productos.map(p=>`<option value="${p.precio_venta}" data-n="${p.nombre.replace(/"/g,'&quot;')}">${p.nombre}</option>`).join('');
+  const d=document.createElement('div');
+  d.id=id; d.style.cssText='background:var(--gray-bg);border-radius:var(--radius);padding:10px;margin-bottom:8px;';
+  d.innerHTML=`<select style="width:100%;margin-bottom:6px;" onchange="syncNVPU(this)"><option value="">Seleccionar producto...</option>${opts}</select><div style="display:grid;grid-template-columns:1fr 1fr auto;gap:6px;align-items:center;"><input type="number" min="1" value="1" placeholder="Cant." onchange="calcNV()" style="margin-bottom:0;"><input type="number" placeholder="P. Unit. S/" onchange="calcNV()" style="margin-bottom:0;"><button class="btn btn-danger btn-sm" onclick="document.getElementById('${id}').remove();calcNV()">✕</button></div>`;
+  document.getElementById('nv-items').appendChild(d);
+}
+
+function syncNVPU(sel) { const row=sel.closest('div[id]'); const opt=sel.options[sel.selectedIndex]; row.querySelectorAll('input')[1].value=sel.value||''; calcNV(); }
+
+function calcNV() {
+  let sub=0;
+  document.querySelectorAll('#nv-items > div[id]').forEach(d=>{ const ii=d.querySelectorAll('input'); sub+=parseFloat(ii[0].value||0)*parseFloat(ii[1].value||0); });
+  const tipo=document.getElementById('nv-tipo')?.value||'boleta';
+  const igv=tipo==='factura'?sub*18/118:0;
+  document.getElementById('nv-sub').textContent=fmt(tipo==='factura'?sub-igv:sub);
+  document.getElementById('nv-igv').textContent=fmt(igv);
+  document.getElementById('nv-total').textContent=fmt(sub);
+}
+
+async function guardarVenta(printMode) {
+  const tipo   = document.getElementById('nv-tipo').value;
+  const pago   = document.getElementById('nv-pago').value;
+  const cliente= document.getElementById('nv-cliente').value||'Cliente general';
+  const doc    = document.getElementById('nv-doc').value;
+  const items  = [];
+  document.querySelectorAll('#nv-items > div[id]').forEach(d=>{ const s=d.querySelector('select'),ii=d.querySelectorAll('input'); if(s.value) items.push({ prod_id:null, nombre:s.options[s.selectedIndex].dataset.n||s.options[s.selectedIndex].text, qty:parseFloat(ii[0].value), pu:parseFloat(ii[1].value) }); });
+  if (!items.length) { alert('Agrega al menos un producto'); return; }
+  const sub=items.reduce((a,i)=>a+i.qty*i.pu,0);
+  const igv=tipo==='factura'?sub*18/118:0;
+  const serie  = tipo==='factura'?(config.serie_factura||'F001'):(config.serie_boleta||'B001');
+  const corr   = config['correlativo_'+tipo]||'1';
+  const numero = `${serie}-${String(parseInt(corr)).padStart(4,'0')}`;
+  const { data, error } = await sb.from('ventas').insert([{ numero,tipo,serie,cliente_nombre:cliente,cliente_doc:doc,fecha:hoy(),subtotal:parseFloat((sub-igv).toFixed(2)),igv:parseFloat(igv.toFixed(2)),total:parseFloat(sub.toFixed(2)),metodo_pago:pago,estado:tipo==='cotizacion'?'pendiente':'pagado' }]).select().single();
+  if (error) { alert('Error: '+error.message); return; }
+  const itemsData=items.map(i=>({ venta_id:data.id,producto_nombre:i.nombre,cantidad:i.qty,precio_unitario:i.pu,subtotal:i.qty*i.pu }));
+  await sb.from('venta_items').insert(itemsData);
+  await sb.from('configuracion').upsert({ clave:'correlativo_'+tipo, valor:String(parseInt(corr)+1) },{ onConflict:'clave' });
+  await loadConfig();
+  ultimaVentaId=data.id;
+  if (printMode) printVenta({...data,venta_items:itemsData.map(i=>({...i,producto_nombre:i.producto_nombre}))},printMode==='print-a4'?'A4':'ticket');
+  alert(`${tipo} ${numero} guardada ✓`);
+  document.getElementById('nv-items').innerHTML='';
+  calcNV();
+  loadVentas();
+}
+
+// ============================================================
+// INVENTARIO
+// ============================================================
+async function loadInventario() {
+  const search=document.getElementById('inv-search')?.value.toLowerCase()||'';
+  const cat=document.getElementById('inv-cat')?.value||'';
+  let q=sb.from('productos').select('*').order('nombre');
+  if (cat) q=q.eq('categoria',cat);
+  const { data }=await q;
+  const prods=(data||[]).filter(p=>!search||p.nombre.toLowerCase().includes(search)||p.codigo.toLowerCase().includes(search));
+  document.getElementById('tabla-inv').innerHTML=prods.length?prods.map(p=>`<tr><td>${p.codigo}</td><td><b>${p.nombre}</b></td><td>${p.unidad}</td><td>${fmt(p.precio_compra)}</td><td>${fmt(p.precio_venta)}</td><td style="color:${p.stock<=p.stock_minimo?'var(--red)':'var(--green)'};">${p.stock}</td><td>${p.stock_minimo}</td><td><span class="badge ${p.stock<=p.stock_minimo?'br':'bg'}">${p.stock<=p.stock_minimo?'bajo':'ok'}</span></td><td><button class="btn btn-sm btn-danger" onclick="eliminarProducto('${p.id}')">Eliminar</button></td></tr>`).join(''):`<tr><td colspan="9"><div class="empty">Sin productos</div></td></tr>`;
+}
+
+async function guardarProducto() {
+  const nombre=document.getElementById('np-nombre').value; if(!nombre){alert('Ingresa el nombre');return;}
+  const { error }=await sb.from('productos').insert([{
+    codigo:document.getElementById('np-codigo').value||'MAD-'+Date.now(),
+    nombre,
+    categoria:document.getElementById('np-cat').value,
+    unidad:document.getElementById('np-unidad').value,
+    precio_compra:parseFloat(document.getElementById('np-pcompra').value)||0,
+    precio_venta:parseFloat(document.getElementById('np-pventa').value)||0,
+    stock:parseInt(document.getElementById('np-stock').value)||0,
+    stock_minimo:parseInt(document.getElementById('np-stockmin').value)||10
+  }]);
+  if(error){alert('Error: '+error.message);return;}
+  ['np-nombre','np-codigo','np-pcompra','np-pventa','np-stock','np-stockmin'].forEach(id=>document.getElementById(id).value='');
+  await loadProductosCache();
+  await loadInventario();
+  alert('Producto guardado ✓');
+}
+
+async function eliminarProducto(id) {
+  if(!confirm('¿Eliminar este producto?'))return;
+  await sb.from('productos').delete().eq('id',id);
+  await loadProductosCache();
+  await loadInventario();
+}
+
+async function loadKardex() {
+  const prodId=document.getElementById('kardex-prod').value; if(!prodId){alert('Selecciona un producto');return;}
+  const { data:entradas }=await sb.from('compra_items').select('*,compras(numero,fecha)').eq('producto_id',prodId).order('created_at',{ascending:false});
+  const { data:salidas  }=await sb.from('venta_items').select('*,ventas(numero,fecha)').eq('producto_id',prodId).order('created_at',{ascending:false});
+  const movs=[
+    ...(entradas||[]).map(e=>({ fecha:e.compras?.fecha, doc:e.compras?.numero, tipo:'entrada', cant:e.cantidad, pu:e.precio_unitario })),
+    ...(salidas||[]).map(s=>({ fecha:s.ventas?.fecha, doc:s.ventas?.numero, tipo:'salida', cant:s.cantidad, pu:s.precio_unitario }))
+  ].sort((a,b)=>b.fecha?.localeCompare(a.fecha));
+  let saldo=productos.find(p=>p.id===prodId)?.stock||0;
+  document.getElementById('kardex-content').innerHTML=movs.length?`<table><thead><tr><th>Fecha</th><th>Documento</th><th>Tipo</th><th>Cantidad</th><th>P.Unit</th></tr></thead><tbody>${movs.map(m=>`<tr><td>${m.fecha||'—'}</td><td>${m.doc||'—'}</td><td><span class="badge ${m.tipo==='entrada'?'bt':'br'}">${m.tipo}</span></td><td>${m.tipo==='entrada'?'+':'-'}${m.cant}</td><td>${fmt(m.pu)}</td></tr>`).join('')}</tbody></table>`:`<div class="empty">Sin movimientos registrados</div>`;
+}
+
+// ============================================================
+// COMPRAS
+// ============================================================
+async function loadCompras() {
+  const { data }=await sb.from('compras').select('*').order('created_at',{ascending:false}).limit(50);
+  document.getElementById('tabla-compras').innerHTML=(data||[]).length?(data||[]).map(c=>`<tr><td><b>${c.numero}</b></td><td>${c.proveedor_nombre}</td><td>${c.fecha}</td><td>${fmt(c.total)}</td><td><span class="badge ${c.estado==='recibido'?'bg':'ba'}">${c.estado}</span></td><td><div style="display:flex;gap:4px;"><button class="btn btn-sm btn-success" onclick="recibirCompra('${c.id}')">Recibir</button><button class="btn btn-sm" onclick="printCompraById('${c.id}')">A4</button></div></td></tr>`).join(''):`<tr><td colspan="6"><div class="empty">Sin órdenes</div></td></tr>`;
+}
+
+function addNCItem() {
+  const id='nci'+Date.now();
+  const opts=productos.map(p=>`<option value="${p.precio_compra}">${p.nombre}</option>`).join('');
+  const d=document.createElement('div'); d.id=id;
+  d.style.cssText='background:var(--gray-bg);border-radius:var(--radius);padding:10px;margin-bottom:8px;';
+  d.innerHTML=`<select style="width:100%;margin-bottom:6px;" onchange="this.closest('[id]').querySelectorAll('input')[1].value=this.value||'';calcNC()"><option value="">Seleccionar...</option>${opts}</select><div style="display:grid;grid-template-columns:1fr 1fr auto;gap:6px;align-items:center;"><input type="number" min="1" value="1" placeholder="Cant." onchange="calcNC()" style="margin-bottom:0;"><input type="number" placeholder="P. Unit. S/" onchange="calcNC()" style="margin-bottom:0;"><button class="btn btn-danger btn-sm" onclick="document.getElementById('${id}').remove();calcNC()">✕</button></div>`;
+  document.getElementById('nc-items').appendChild(d);
+}
+
+function calcNC() {
+  let t=0;
+  document.querySelectorAll('#nc-items > div[id]').forEach(d=>{ const ii=d.querySelectorAll('input'); t+=parseFloat(ii[0].value||0)*parseFloat(ii[1].value||0); });
+  document.getElementById('nc-total').textContent=fmt(t);
+}
+
+async function guardarCompra(printMode) {
+  const items=[];
+  document.querySelectorAll('#nc-items > div[id]').forEach(d=>{ const s=d.querySelector('select'),ii=d.querySelectorAll('input'); if(s.value) items.push({ nombre:s.options[s.selectedIndex].text, qty:parseFloat(ii[0].value), pu:parseFloat(ii[1].value) }); });
+  if(!items.length){alert('Agrega productos');return;}
+  const total=items.reduce((a,i)=>a+i.qty*i.pu,0);
+  const corrC=parseInt(config.correlativo_compra||'1');
+  const numero='OC-'+String(corrC).padStart(4,'0');
+  const { data,error }=await sb.from('compras').insert([{ numero,proveedor_nombre:document.getElementById('nc-prov').value||'Proveedor',proveedor_ruc:document.getElementById('nc-ruc').value,fecha:hoy(),total:parseFloat(total.toFixed(2)),estado:'pendiente',notas:document.getElementById('nc-notas').value }]).select().single();
+  if(error){alert('Error: '+error.message);return;}
+  await sb.from('compra_items').insert(items.map(i=>({ compra_id:data.id,producto_nombre:i.nombre,cantidad:i.qty,precio_unitario:i.pu,subtotal:i.qty*i.pu })));
+  await sb.from('configuracion').upsert({ clave:'correlativo_compra',valor:String(corrC+1) },{onConflict:'clave'});
+  await loadConfig();
+  if(printMode) printCompra({...data,compra_items:items});
+  alert('Orden '+numero+' guardada ✓');
+  document.getElementById('nc-items').innerHTML=''; calcNC();
+  loadCompras();
+}
+
+async function recibirCompra(id) {
+  if(!confirm('¿Marcar como recibido? Esto actualizará el inventario.'))return;
+  const { data }=await sb.from('compra_items').select('*').eq('compra_id',id);
+  for(const item of (data||[])) {
+    if(item.producto_id) await sb.from('productos').update({ stock:sb.rpc('increment',{}) }).eq('id',item.producto_id);
+  }
+  await sb.from('compras').update({ estado:'recibido' }).eq('id',id);
+  loadCompras(); alert('Compra marcada como recibida ✓');
+}
+
+// ============================================================
+// CLIENTES
+// ============================================================
+async function loadClientes() {
+  const search=document.getElementById('cli-search')?.value.toLowerCase()||'';
+  const { data }=await sb.from('clientes').select('*').order('nombre');
+  const clientes=(data||[]).filter(c=>!search||c.nombre.toLowerCase().includes(search)||(c.documento||'').includes(search));
+  document.getElementById('tabla-clientes').innerHTML=clientes.length?clientes.map(c=>`<tr><td><b>${c.nombre}</b></td><td>${c.documento||'—'}</td><td><span class="badge ${c.tipo_cliente==='Jurídico'?'bb':''}">${c.tipo_cliente||'Natural'}</span></td><td>${c.telefono||'—'}</td><td>—</td><td><button class="btn btn-sm">Ver historial</button></td></tr>`).join(''):`<tr><td colspan="6"><div class="empty">Sin clientes</div></td></tr>`;
+}
+
+function nuevoCliente() {
+  document.getElementById('modal-content').innerHTML=`<div class="modal-title">Nuevo cliente</div><div class="form-g"><label class="form-l">Nombre</label><input id="mc-nombre" placeholder="Nombre completo" style="width:100%;"></div><div class="form-r"><div class="form-g"><label class="form-l">DNI / RUC</label><input id="mc-doc" placeholder="12345678"></div><div class="form-g"><label class="form-l">Tipo</label><select id="mc-tipo"><option>Natural</option><option>Jurídico</option></select></div></div><div class="form-r"><div class="form-g"><label class="form-l">Teléfono</label><input id="mc-tel" placeholder="987 654 321"></div><div class="form-g"><label class="form-l">Email</label><input id="mc-email" placeholder="cliente@email.com"></div></div><div style="display:flex;gap:8px;margin-top:10px;"><button class="btn btn-primary" onclick="saveCliente()">Guardar</button><button class="btn" onclick="closeModal()">Cancelar</button></div>`;
+  openModal();
+}
+
+async function saveCliente() {
+  const nombre=document.getElementById('mc-nombre').value; if(!nombre){alert('Ingresa el nombre');return;}
+  await sb.from('clientes').insert([{ nombre,documento:document.getElementById('mc-doc').value,tipo_cliente:document.getElementById('mc-tipo').value,telefono:document.getElementById('mc-tel').value,email:document.getElementById('mc-email').value }]);
+  closeModal(); loadClientes(); alert('Cliente guardado ✓');
+}
+
+// ============================================================
+// CAJA
+// ============================================================
+async function loadCaja() {
+  const { data }=await sb.from('caja_movimientos').select('*').eq('fecha',hoy()).order('created_at',{ascending:false});
+  const ing=(data||[]).filter(m=>m.tipo==='ingreso').reduce((a,m)=>a+parseFloat(m.monto),0);
+  const egr=(data||[]).filter(m=>m.tipo==='egreso').reduce((a,m)=>a+parseFloat(m.monto),0);
+  document.getElementById('c-ing').textContent=fmt(ing);
+  document.getElementById('c-egr').textContent=fmt(egr);
+  const sal=document.getElementById('c-sal'); sal.textContent=fmt(ing-egr); sal.style.color=(ing-egr)>=0?'var(--teal)':'var(--red)';
+  document.getElementById('tabla-caja').innerHTML=(data||[]).length?(data||[]).map(m=>`<tr><td>${m.hora?.split(':').slice(0,2).join(':')||'—'}</td><td>${m.concepto}</td><td>${m.categoria||'General'}</td><td><span class="badge ${m.tipo==='ingreso'?'bt':'br'}">${m.tipo}</span></td><td style="color:var(--${m.tipo==='ingreso'?'teal':'red'});">${m.tipo==='ingreso'?'+':'-'}${fmt(m.monto)}</td></tr>`).join(''):`<tr><td colspan="5"><div class="empty">Sin movimientos hoy</div></td></tr>`;
+}
+
+function nuevoMovimiento(tipo) {
+  document.getElementById('modal-content').innerHTML=`<div class="modal-title">Nuevo ${tipo}</div><div class="form-g"><label class="form-l">Concepto</label><input id="mm-concepto" placeholder="Descripción del movimiento" style="width:100%;"></div><div class="form-r"><div class="form-g"><label class="form-l">Monto (S/)</label><input id="mm-monto" type="number" step="0.01" placeholder="0.00"></div><div class="form-g"><label class="form-l">Categoría</label><select id="mm-cat"><option>Ventas</option><option>Compras</option><option>Servicios</option><option>Sueldos</option><option>Otros</option></select></div></div><div style="display:flex;gap:8px;margin-top:10px;"><button class="btn btn-primary" onclick="saveMovimiento('${tipo}')">Guardar</button><button class="btn" onclick="closeModal()">Cancelar</button></div>`;
+  openModal();
+}
+
+async function saveMovimiento(tipo) {
+  const concepto=document.getElementById('mm-concepto').value; if(!concepto){alert('Ingresa el concepto');return;}
+  await sb.from('caja_movimientos').insert([{ concepto,tipo,categoria:document.getElementById('mm-cat').value,monto:parseFloat(document.getElementById('mm-monto').value)||0,fecha:hoy(),hora:new Date().toTimeString().split(' ')[0] }]);
+  closeModal(); loadCaja(); alert('Movimiento guardado ✓');
+}
+
+// ============================================================
+// REPORTES
+// ============================================================
+async function loadReporteVentas() {
+  const mes=mesActual();
+  const { data }=await sb.from('ventas').select('*').gte('fecha',mes+'-01').order('fecha',{ascending:false});
+  const ventas=(data||[]).filter(v=>v.tipo!=='cotizacion');
+  const total=ventas.reduce((a,v)=>a+parseFloat(v.total),0);
+  document.getElementById('r-tv').textContent=fmt(total);
+  document.getElementById('r-nv').textContent=ventas.length;
+  document.getElementById('r-prom').textContent=ventas.length?fmt(total/ventas.length):fmt(0);
+  document.getElementById('tabla-rventas').innerHTML=ventas.length?ventas.map(v=>`<tr><td>${v.fecha}</td><td><span class="badge ${v.tipo==='factura'?'bb':'bg'}">${v.tipo}</span></td><td>${v.cliente_nombre||'—'}</td><td>${fmt(v.total)}</td><td>${v.metodo_pago||'—'}</td></tr>`).join(''):`<tr><td colspan="5"><div class="empty">Sin ventas este mes</div></td></tr>`;
+}
+
+async function loadReporteInventario() {
+  document.getElementById('tabla-rinv').innerHTML=productos.length?productos.map(p=>{ const margen=p.precio_venta>0?((p.precio_venta-p.precio_compra)/p.precio_venta*100).toFixed(0):0; return `<tr><td><b>${p.nombre}</b></td><td style="color:${p.stock<=p.stock_minimo?'var(--red)':'var(--green)'};">${p.stock}</td><td>${fmt(p.precio_compra)}</td><td>${fmt(p.precio_venta)}</td><td>${fmt(p.stock*p.precio_compra)}</td><td>${margen}%</td></tr>`; }).join(''):`<tr><td colspan="6"><div class="empty">Sin productos</div></td></tr>`;
+}
+
+async function loadReporteFinanciero() {
+  const { data:v }=await sb.from('ventas').select('total,tipo,igv').neq('tipo','cotizacion');
+  const { data:c }=await sb.from('compras').select('total');
+  const ing=(v||[]).reduce((a,x)=>a+parseFloat(x.total),0);
+  const egr=(c||[]).reduce((a,x)=>a+parseFloat(x.total),0);
+  const igv=(v||[]).filter(x=>x.tipo==='factura').reduce((a,x)=>a+parseFloat(x.igv||0),0);
+  document.getElementById('rf-ing').textContent=fmt(ing);
+  document.getElementById('rf-egr').textContent=fmt(egr);
+  const util=ing-egr; const ue=document.getElementById('rf-util'); ue.textContent=fmt(util); ue.style.color=util>=0?'var(--teal)':'var(--red)';
+  document.getElementById('rf-igv').textContent=fmt(igv);
+}
+
+async function loadProveedores() {
+  const { data }=await sb.from('proveedores').select('*').order('nombre');
+  document.getElementById('tabla-proveedores').innerHTML=(data||[]).length?(data||[]).map(p=>`<tr><td><b>${p.nombre}</b></td><td>${p.ruc||'—'}</td><td>${p.contacto||'—'}</td><td>${p.telefono||'—'}</td><td><button class="btn btn-sm">Editar</button></td></tr>`).join(''):`<tr><td colspan="5"><div class="empty">Sin proveedores</div></td></tr>`;
+}
+
+function nuevoProveedor() {
+  document.getElementById('modal-content').innerHTML=`<div class="modal-title">Nuevo proveedor</div><div class="form-g"><label class="form-l">Nombre</label><input id="mp-nombre" placeholder="Razón social o nombre" style="width:100%;"></div><div class="form-r"><div class="form-g"><label class="form-l">RUC</label><input id="mp-ruc" placeholder="20XXXXXXXXX"></div><div class="form-g"><label class="form-l">Teléfono</label><input id="mp-tel" placeholder="987 654 321"></div></div><div style="display:flex;gap:8px;margin-top:10px;"><button class="btn btn-primary" onclick="saveProveedor()">Guardar</button><button class="btn" onclick="closeModal()">Cancelar</button></div>`;
+  openModal();
+}
+
+async function saveProveedor() {
+  const nombre=document.getElementById('mp-nombre').value; if(!nombre){alert('Ingresa el nombre');return;}
+  await sb.from('proveedores').insert([{ nombre,ruc:document.getElementById('mp-ruc').value,telefono:document.getElementById('mp-tel').value }]);
+  closeModal(); loadProveedores(); alert('Proveedor guardado ✓');
+}
+
+// ============================================================
+// MODAL
+// ============================================================
+function openModal()  { document.getElementById('modal').classList.add('open'); }
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+document.getElementById('modal').addEventListener('click', e=>{ if(e.target===document.getElementById('modal')) closeModal(); });
+
+// ============================================================
+// NAVEGACIÓN
+// ============================================================
+const pageLoaders = {
+  ventas:      loadVentas,
+  inventario:  loadInventario,
+  compras:     loadCompras,
+  clientes:    loadClientes,
+  caja:        loadCaja,
+  reportes:    loadReporteVentas,
+  dashboard:   renderDashboard,
+};
+
+function go(page, btn) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById('p-'+page).classList.add('active');
+  btn.classList.add('active');
+  const titles={dashboard:'Dashboard',pos:'Venta rápida — POS',ventas:'Ventas',inventario:'Inventario',compras:'Compras',clientes:'Clientes',caja:'Caja / Finanzas',reportes:'Reportes',ajustes:'Configuración'};
+  document.getElementById('page-title').textContent=titles[page]||page;
+  if(pageLoaders[page]) pageLoaders[page]();
+}
+
+function stab(btn, id) {
+  if (!btn) return;
+  const parent=btn.closest('.page');
+  parent.querySelectorAll('.stab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  const prefix=id.split('-')[0];
+  parent.querySelectorAll(`[id^="${prefix}-"]`).forEach(el=>el.style.display='none');
+  document.getElementById(id).style.display='block';
+  // Cargar datos específicos
+  if(id==='it-lista') loadInventario();
+  if(id==='ct-lista') loadCompras();
+  if(id==='ct-proveedores') loadProveedores();
+  if(id==='rp-inventario') loadReporteInventario();
+  if(id==='rp-financiero') loadReporteFinanciero();
+}
+
+// ============================================================
+// IMPRESIÓN
+// ============================================================
+async function printVentaById(id, formato) {
+  const { data }=await sb.from('ventas').select('*, venta_items(*)').eq('id',id).single();
+  if(data) printVenta(data, formato);
+}
+
+function printVenta(v, formato) {
+  const items=v.venta_items||[];
+  const isT=formato==='ticket';
+  const w=isT?300:794,fs=isT?11:13;
+  const empresa=config.razon_social||'MADERERA LA EMPRESA';
+  const ruc=config.ruc||'20XXXXXXXXXX';
+  const dir=config.direccion||'Lima, Perú';
+  const igv=v.igv||0;
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${v.numero}</title>
+  <style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:Arial,sans-serif;font-size:${fs}px;padding:${isT?'10px':'40px'};width:${w}px;}
+  .c{text-align:center;}.b{font-weight:bold;}.line{border-top:1px dashed #ccc;margin:8px 0;}
+  table{width:100%;border-collapse:collapse;}th,td{padding:${isT?'3px':'6px 8px'};text-align:left;}
+  th{border-bottom:1px solid #ccc;}.r{text-align:right;}</style></head><body>
+  <div class="c b" style="font-size:${isT?14:18}px;margin-bottom:4px;">${empresa}</div>
+  ${isT?'':`<div class="c">${dir}</div>`}
+  <div class="c">RUC: ${ruc}</div><div class="line"></div>
+  <div class="c b" style="font-size:${isT?13:16}px;margin:6px 0;">${v.tipo.toUpperCase()} ELECTRÓNICA</div>
+  <div class="c b">${v.numero}</div><div class="line"></div>
+  <div><b>Cliente:</b> ${v.cliente_nombre||'—'}</div>
+  ${v.cliente_doc?`<div><b>${v.tipo==='factura'?'RUC':'DNI'}:</b> ${v.cliente_doc}</div>`:''}
+  <div><b>Fecha:</b> ${v.fecha}</div><div><b>Pago:</b> ${v.metodo_pago||'efectivo'}</div>
+  <div class="line"></div>
+  <table><thead><tr><th>Descripción</th><th class="r">Cant.</th><th class="r">P.U.</th><th class="r">Total</th></tr></thead>
+  <tbody>${items.map(i=>`<tr><td>${i.producto_nombre}</td><td class="r">${i.cantidad}</td><td class="r">S/${parseFloat(i.precio_unitario).toFixed(2)}</td><td class="r">S/${parseFloat(i.subtotal).toFixed(2)}</td></tr>`).join('')}</tbody></table>
+  <div class="line"></div>
+  ${v.tipo==='factura'?`<div class="r">Op. gravada: S/${parseFloat(v.subtotal||0).toFixed(2)}</div><div class="r">IGV 18%: S/${parseFloat(igv).toFixed(2)}</div>`:''}
+  <div class="r b" style="font-size:${fs+3}px;">TOTAL: S/${parseFloat(v.total).toFixed(2)}</div>
+  <div class="line"></div><div class="c" style="margin-top:8px;">¡Gracias por su compra!</div>
+  <script>window.onload=()=>window.print()<\/script></body></html>`;
+  const pw=window.open('','_blank',`width=${w+40},height=620`); pw.document.write(html); pw.document.close();
+}
+
+async function printCompraById(id) {
+  const { data }=await sb.from('compras').select('*,compra_items(*)').eq('id',id).single();
+  if(data) printCompra(data);
+}
+
+function printCompra(c) {
+  const items=c.compra_items||[];
+  const empresa=config.razon_social||'MADERERA LA EMPRESA';
+  const ruc=config.ruc||'20XXXXXXXXXX';
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${c.numero}</title>
+  <style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:Arial,sans-serif;font-size:13px;padding:40px;width:794px;}
+  .line{border-top:1px solid #ccc;margin:10px 0;}table{width:100%;border-collapse:collapse;}
+  th,td{padding:6px 8px;text-align:left;border-bottom:1px solid #eee;}th{background:#f5f5f5;}.r{text-align:right;}.b{font-weight:bold;}</style></head><body>
+  <h2>${empresa}</h2><div>RUC: ${ruc}</div><div class="line"></div>
+  <h3>ORDEN DE COMPRA — ${c.numero}</h3>
+  <div>Proveedor: <b>${c.proveedor_nombre}</b> | RUC: ${c.proveedor_ruc||'—'} | Fecha: ${c.fecha}</div>
+  ${c.notas?`<div>Notas: ${c.notas}</div>`:''}
+  <div class="line"></div>
+  <table><thead><tr><th>Producto</th><th class="r">Cant.</th><th class="r">P.Unit.</th><th class="r">Total</th></tr></thead>
+  <tbody>${items.map(i=>`<tr><td>${i.producto_nombre||i.nombre}</td><td class="r">${i.cantidad||i.qty}</td><td class="r">S/${parseFloat(i.precio_unitario||i.pu||0).toFixed(2)}</td><td class="r">S/${parseFloat(i.subtotal||0).toFixed(2)}</td></tr>`).join('')}</tbody></table>
+  <div class="line"></div><div class="r b" style="font-size:16px;">TOTAL: S/${parseFloat(c.total).toFixed(2)}</div>
+  <div class="line" style="margin-top:30px;"></div><div>Firma de recepción: _________________________ Fecha: __________</div>
+  <script>window.onload=()=>window.print()<\/script></body></html>`;
+  const pw=window.open('','_blank','width:834,height:620'); pw.document.write(html); pw.document.close();
+}
+
+// ============================================================
+// PWA / SERVICE WORKER
+// ============================================================
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+}
+
+// ---- ARRANQUE ----
+checkSession();
+</script>
+</body>
+</html>
