@@ -803,7 +803,10 @@ async function guardarConfig() {
   alert('Configuración guardada ✓');
 }
 
-async function guardarConfigComprobantes() {
+async function guardarConfigComprobantes(await sb.from('configuracion').upsert([
+  { clave: 'serie_factura', valor: document.getElementById('cfg-sf').value },
+  { clave: 'correlativo_factura', valor: 1 }
+], { onConflict: 'clave' });) {
   const updates = [
     { clave:'serie_boleta',  valor: document.getElementById('cfg-sb').value },
     { clave:'serie_factura', valor: document.getElementById('cfg-sf').value },
